@@ -1,0 +1,42 @@
+import { route } from 'quasar/wrappers';
+import {
+  createMemoryHistory,
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
+} from 'vue-router';
+import routes from './routes';
+import { getAccessToken } from 'src/utils/storage';
+
+export default route(function () {
+  const createHistory = process.env.SERVER
+    ? createMemoryHistory
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory;
+
+  const Router = createRouter({
+    scrollBehavior: () => ({ left: 0, top: 0 }),
+    routes,
+    history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  Router.beforeEach((to, from, next) => {
+    const token = getAccessToken();
+    const isLoginRoute = to.path === '/login';
+
+    if (!token && !isLoginRoute) {
+      next('/login');
+      return;
+    }
+
+    if (token && isLoginRoute) {
+      next('/appointments');
+      return;
+    }
+
+    next();
+  });
+
+  return Router;
+});
