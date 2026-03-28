@@ -1,0 +1,20 @@
+import { z } from 'zod';
+
+export const envSchema = z.object({
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
+
+  PORT: z.coerce.number().default(3000),
+
+  DB_HOST: z.string().min(1),
+  DB_PORT: z.coerce.number(),
+  DB_USERNAME: z.string().min(1),
+  DB_PASSWORD: z.string().min(1),
+  DB_NAME: z.string().min(1),
+
+  JWT_SECRET: z.string().min(1),
+  JWT_EXPIRES_IN: z.string().default('1d'),
+});
+
+export type Env = z.infer<typeof envSchema>;
