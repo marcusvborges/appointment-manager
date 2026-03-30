@@ -13,7 +13,7 @@ export class Doctor extends CustomBaseEntity {
   @Column({ type: 'uuid' })
   specialtyId: string;
 
-  @ManyToOne(() => Specialty, (specialty) => specialty.doctors, { eager: true })
+  @ManyToOne(() => Specialty, (specialty) => specialty.doctors)
   @JoinColumn({ name: 'specialtyId' })
   specialty: Specialty;
 }

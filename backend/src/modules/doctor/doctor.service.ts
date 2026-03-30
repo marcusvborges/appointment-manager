@@ -8,14 +8,15 @@ import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { Doctor } from './entities/doctor.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SpecialtyService } from '../specialty/specialty.service';
+import { Specialty } from '../specialty/entities/specialty.entity';
 
 @Injectable()
 export class DoctorService {
   constructor(
     @InjectRepository(Doctor)
     private readonly doctorRepository: Repository<Doctor>,
-    private readonly specialtyService: SpecialtyService,
+    @InjectRepository(Specialty)
+    private readonly specialtyRepository: Repository<Specialty>,
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
@@ -35,7 +36,9 @@ export class DoctorService {
   }
 
   async findAll(): Promise<Doctor[]> {
-    return this.doctorRepository.find();
+    return this.doctorRepository.find({
+      relations: ['specialty'],
+    });
   }
 
   async findOne(id: string): Promise<Doctor> {
@@ -75,7 +78,10 @@ export class DoctorService {
   }
 
   private async findByIdOrFail(id: string): Promise<Doctor> {
-    const doctor = await this.doctorRepository.findOne({ where: { id } });
+    const doctor = await this.doctorRepository.findOne({
+      where: { id },
+      relations: ['specialty'],
+    });
 
     if (!doctor) {
       throw new NotFoundException('Doctor not found');
@@ -85,6 +91,6 @@ export class DoctorService {
   }
 
   private async checkSpecialtyExists(specialtyId: string): Promise<void> {
-    await this.specialtyService.findOne(specialtyId);
+    await this.specialtyRepository.findOne({ where: { id: specialtyId } });
   }
 }

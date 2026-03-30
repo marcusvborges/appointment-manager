@@ -8,12 +8,15 @@ import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Specialty } from './entities/specialty.entity';
 import { Repository } from 'typeorm';
+import { Doctor } from '../doctor/entities/doctor.entity';
 
 @Injectable()
 export class SpecialtyService {
   constructor(
     @InjectRepository(Specialty)
     private readonly specialtyRepository: Repository<Specialty>,
+    @InjectRepository(Doctor)
+    private readonly doctorRepository: Repository<Doctor>,
   ) {}
 
   async create(createSpecialtyDto: CreateSpecialtyDto): Promise<Specialty> {
@@ -34,15 +37,18 @@ export class SpecialtyService {
     return this.specialtyRepository.save(specialty);
   }
 
-  async findAll() {
+  async findAll(): Promise<Specialty[]> {
     return this.specialtyRepository.find();
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Specialty> {
     return await this.findByIdOrFail(id);
   }
 
-  async update(id: string, updateSpecialtyDto: UpdateSpecialtyDto) {
+  async update(
+    id: string,
+    updateSpecialtyDto: UpdateSpecialtyDto,
+  ): Promise<Specialty> {
     const specialty = await this.findByIdOrFail(id);
 
     if (updateSpecialtyDto.name !== undefined) {
@@ -70,6 +76,18 @@ export class SpecialtyService {
 
   async remove(id: string) {
     await this.findOne(id);
+
+    const hasDoctorsLinked = await this.doctorRepository.findOne({
+      where: { specialtyId: id },
+      select: ['id'],
+    });
+
+    if (hasDoctorsLinked) {
+      throw new ConflictException(
+        'Cannot delete specialty with linked doctors',
+      );
+    }
+
     await this.specialtyRepository.delete(id);
 
     return { message: 'Specialty removed successfully' };
