@@ -1,9 +1,10 @@
-import { CustomBaseEntity } from 'src/modules/database/entities/base.entity';
-import { HealthPlan } from 'src/modules/health-plan/entities/health-plan.entity';
-import { Patient } from 'src/modules/patient/entities/patient.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Appointment } from '../../appointment/entities/appointment.entity';
+import { CustomBaseEntity } from '../../database/entities/base.entity';
+import { HealthPlan } from '../../health-plan/entities/health-plan.entity';
+import { Patient } from '../../patient/entities/patient.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
-@Entity()
+@Entity('patient_plans')
 export class PatientPlan extends CustomBaseEntity {
   @Column({ type: 'varchar', length: 100, unique: true })
   contractNumber: string;
@@ -21,4 +22,7 @@ export class PatientPlan extends CustomBaseEntity {
   @ManyToOne(() => HealthPlan)
   @JoinColumn({ name: 'healthPlanId' })
   healthPlan: HealthPlan;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.patientPlan)
+  appointments: Appointment[];
 }

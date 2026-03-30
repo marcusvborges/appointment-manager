@@ -1,6 +1,7 @@
 import { PatientPlan } from 'src/modules/patient-plan/entities/patient-plan.entity';
 import { CustomBaseEntity } from '../../database/entities/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { AppointmentProcedure } from 'src/modules/appointment/entities/appointment-procedure.entity';
 
 @Entity('patients')
 export class Patient extends CustomBaseEntity {
@@ -15,4 +16,10 @@ export class Patient extends CustomBaseEntity {
 
   @OneToMany(() => PatientPlan, (patientPlan) => patientPlan.patient)
   patientPlans: PatientPlan[];
+
+  @OneToMany(
+    () => AppointmentProcedure,
+    (appointmentProcedure) => appointmentProcedure.procedure,
+  )
+  appointmentProcedures: AppointmentProcedure[];
 }
