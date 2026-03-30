@@ -9,12 +9,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HealthPlan } from './entities/health-plan.entity';
 import { Repository } from 'typeorm';
 import { standardizeName } from 'src/common/utils/name.utils';
+import { PatientPlan } from '../patient-plan/entities/patient-plan.entity';
 
 @Injectable()
 export class HealthPlanService {
   constructor(
     @InjectRepository(HealthPlan)
     private readonly healthPlanRepository: Repository<HealthPlan>,
+    @InjectRepository(PatientPlan)
+    private readonly patientPlanRepository: Repository<PatientPlan>,
   ) {}
 
   async create(createHealthPlanDto: CreateHealthPlanDto): Promise<HealthPlan> {
@@ -59,8 +62,20 @@ export class HealthPlanService {
     return this.healthPlanRepository.save(healthPlan);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<{ message: string }> {
     await this.findByIdOrFail(id);
+
+    const hasPatientPlans = await this.patientPlanRepository.findOne({
+      where: { healthPlanId: id },
+      select: ['id'],
+    });
+
+    if (hasPatientPlans) {
+      throw new ConflictException(
+        'Cannot delete health plan with linked patient plans',
+      );
+    }
+
     await this.healthPlanRepository.delete(id);
 
     return { message: 'Health plan removed successfully' };

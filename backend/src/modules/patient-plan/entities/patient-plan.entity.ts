@@ -15,11 +15,15 @@ export class PatientPlan extends CustomBaseEntity {
   @Column({ type: 'uuid' })
   healthPlanId: string;
 
-  @ManyToOne(() => Patient)
+  @ManyToOne(() => Patient, (patient) => patient.patientPlans, {
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'patientId' })
   patient: Patient;
 
-  @ManyToOne(() => HealthPlan)
+  @ManyToOne(() => HealthPlan, (healthPlan) => healthPlan.patientPlans, {
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'healthPlanId' })
   healthPlan: HealthPlan;
 

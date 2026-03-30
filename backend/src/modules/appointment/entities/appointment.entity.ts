@@ -22,15 +22,22 @@ export class Appointment extends CustomBaseEntity {
   @Column({ type: 'boolean', default: true })
   isPrivate: boolean;
 
-  @ManyToOne(() => Patient)
+  @ManyToOne(() => Patient, (patient) => patient.appointments, {
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'patientId' })
   patient: Patient;
 
-  @ManyToOne(() => Doctor)
+  @ManyToOne(() => Doctor, (doctor) => doctor.appointments, {
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'doctorId' })
   doctor: Doctor;
 
-  @ManyToOne(() => PatientPlan, { nullable: true })
+  @ManyToOne(() => PatientPlan, (patientPlan) => patientPlan.appointments, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'patientPlanId' })
   patientPlan: PatientPlan | null;
 

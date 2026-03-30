@@ -9,6 +9,7 @@ import { Doctor } from './entities/doctor.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Specialty } from '../specialty/entities/specialty.entity';
+import { Appointment } from '../appointment/entities/appointment.entity';
 
 @Injectable()
 export class DoctorService {
@@ -17,6 +18,8 @@ export class DoctorService {
     private readonly doctorRepository: Repository<Doctor>,
     @InjectRepository(Specialty)
     private readonly specialtyRepository: Repository<Specialty>,
+    @InjectRepository(Appointment)
+    private readonly appointmentRepository: Repository<Appointment>,
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
@@ -58,8 +61,20 @@ export class DoctorService {
     return this.doctorRepository.save(doctor);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<{ message: string }> {
     await this.findByIdOrFail(id);
+
+    const hasAppointments = await this.appointmentRepository.findOne({
+      where: { doctorId: id },
+      select: ['id'],
+    });
+
+    if (hasAppointments) {
+      throw new ConflictException(
+        'Cannot delete doctor with linked appointments',
+      );
+    }
+
     await this.doctorRepository.delete(id);
 
     return { message: 'Doctor removed successfully' };

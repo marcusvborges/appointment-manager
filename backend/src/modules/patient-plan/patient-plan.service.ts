@@ -114,7 +114,7 @@ export class PatientPlanService {
     return this.patientPlanRepository.save(patientPlan);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<{ message: string }> {
     const patientPlan = await this.findByIdOrFail(id);
 
     await this.patientPlanRepository.delete(patientPlan.id);

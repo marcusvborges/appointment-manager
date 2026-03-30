@@ -14,7 +14,9 @@ export class Doctor extends CustomBaseEntity {
   @Column({ type: 'uuid' })
   specialtyId: string;
 
-  @ManyToOne(() => Specialty, (specialty) => specialty.doctors)
+  @ManyToOne(() => Specialty, (specialty) => specialty.doctors, {
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'specialtyId' })
   specialty: Specialty;
 

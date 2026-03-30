@@ -1,16 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { Patient } from './entities/patient.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PatientPlanService } from '../patient-plan/patient-plan.service';
+import { Appointment } from '../appointment/entities/appointment.entity';
 
 @Injectable()
 export class PatientService {
   constructor(
     @InjectRepository(Patient)
     private readonly patientRepository: Repository<Patient>,
+    private readonly appointmentRepository: Repository<Appointment>,
     private readonly patientPlanService: PatientPlanService,
   ) {}
 
@@ -54,8 +60,20 @@ export class PatientService {
     return await this.patientRepository.save(patient);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<{ message: string }> {
     await this.findByIdOrFail(id);
+
+    const hasAppointments = await this.appointmentRepository.findOne({
+      where: { patientId: id },
+      select: ['id'],
+    });
+
+    if (hasAppointments) {
+      throw new ConflictException(
+        'Cannot delete patient with linked appointments',
+      );
+    }
+
     await this.patientRepository.delete(id);
 
     return { message: 'Patient removed successfully' };

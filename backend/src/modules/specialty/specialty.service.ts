@@ -61,7 +61,7 @@ export class SpecialtyService {
     return this.specialtyRepository.save(specialty);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<{ message: string }> {
     await this.findByIdOrFail(id);
 
     const hasDoctorsLinked = await this.doctorRepository.findOne({

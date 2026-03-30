@@ -9,12 +9,15 @@ import { Procedure } from './entities/procedure.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { standardizeName } from '../../common/utils/name.utils';
+import { AppointmentProcedure } from '../appointment/entities/appointment-procedure.entity';
 
 @Injectable()
 export class ProcedureService {
   constructor(
     @InjectRepository(Procedure)
     private readonly procedureRepository: Repository<Procedure>,
+    @InjectRepository(AppointmentProcedure)
+    private readonly appointmentProcedureRepository: Repository<AppointmentProcedure>,
   ) {}
 
   async create(createProcedureDto: CreateProcedureDto): Promise<Procedure> {
@@ -59,8 +62,21 @@ export class ProcedureService {
     return this.procedureRepository.save(procedure);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<{ message: string }> {
     await this.findByIdOrFail(id);
+
+    const hasAppointmentsLinked =
+      await this.appointmentProcedureRepository.findOne({
+        where: { procedureId: id },
+        select: ['id'],
+      });
+
+    if (hasAppointmentsLinked) {
+      throw new ConflictException(
+        'Cannot delete procedure linked to appointments',
+      );
+    }
+
     await this.procedureRepository.delete(id);
 
     return { message: 'Procedure removed successfully' };
