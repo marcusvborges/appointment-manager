@@ -16,6 +16,7 @@ export class PatientService {
   constructor(
     @InjectRepository(Patient)
     private readonly patientRepository: Repository<Patient>,
+    @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
     private readonly patientPlanService: PatientPlanService,
   ) {}
