@@ -8,6 +8,7 @@ import { UpdateHealthPlanDto } from './dto/update-health-plan.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HealthPlan } from './entities/health-plan.entity';
 import { Repository } from 'typeorm';
+import { standardizeName } from 'src/common/utils/name.utils';
 
 @Injectable()
 export class HealthPlanService {
@@ -17,15 +18,14 @@ export class HealthPlanService {
   ) {}
 
   async create(createHealthPlanDto: CreateHealthPlanDto): Promise<HealthPlan> {
-    const existingHealthPlan = await this.healthPlanRepository.findOne({
-      where: { name: createHealthPlanDto.name },
+    const normalizedName = standardizeName(createHealthPlanDto.name);
+
+    await this.ensureNameIsAvailable(normalizedName);
+
+    const healthPlan = this.healthPlanRepository.create({
+      ...createHealthPlanDto,
+      name: normalizedName,
     });
-
-    if (existingHealthPlan) {
-      throw new ConflictException('Health plan with this name already exists');
-    }
-
-    const healthPlan = this.healthPlanRepository.create(createHealthPlanDto);
 
     return this.healthPlanRepository.save(healthPlan);
   }
@@ -35,29 +35,27 @@ export class HealthPlanService {
   }
 
   async findOne(id: string): Promise<HealthPlan> {
-    return this.findByIdOrFail(id.toString());
+    return this.findByIdOrFail(id);
   }
 
   async update(
     id: string,
     updateHealthPlanDto: UpdateHealthPlanDto,
   ): Promise<HealthPlan> {
-    const healthPlan = await this.findByIdOrFail(id.toString());
+    const healthPlan = await this.findByIdOrFail(id);
 
-    if (
-      updateHealthPlanDto.name !== undefined &&
-      updateHealthPlanDto.name !== healthPlan.name
-    ) {
-      const existingHealthPlan = await this.healthPlanRepository.findOne({
-        where: { name: updateHealthPlanDto.name },
-      });
+    if (updateHealthPlanDto.name !== undefined) {
+      const normalizedName = standardizeName(updateHealthPlanDto.name);
 
-      if (existingHealthPlan) {
-        throw new Error('Health plan with this name already exists');
+      if (normalizedName !== healthPlan.name) {
+        await this.ensureNameIsAvailable(normalizedName);
       }
+
+      updateHealthPlanDto.name = normalizedName;
     }
 
     Object.assign(healthPlan, updateHealthPlanDto);
+
     return this.healthPlanRepository.save(healthPlan);
   }
 
@@ -78,5 +76,15 @@ export class HealthPlanService {
     }
 
     return healthPlan;
+  }
+
+  private async ensureNameIsAvailable(name: string): Promise<void> {
+    const existingHealthPlan = await this.healthPlanRepository.findOne({
+      where: { name },
+    });
+
+    if (existingHealthPlan) {
+      throw new ConflictException('Health plan with this name already exists');
+    }
   }
 }

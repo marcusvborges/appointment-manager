@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Specialty } from './entities/specialty.entity';
 import { Repository } from 'typeorm';
 import { Doctor } from '../doctor/entities/doctor.entity';
+import { standardizeName } from '../../common/utils/name.utils';
 
 @Injectable()
 export class SpecialtyService {
@@ -20,15 +21,9 @@ export class SpecialtyService {
   ) {}
 
   async create(createSpecialtyDto: CreateSpecialtyDto): Promise<Specialty> {
-    const normalizedName = this.normalizeName(createSpecialtyDto.name);
+    const normalizedName = standardizeName(createSpecialtyDto.name);
 
-    const existingSpecialty = await this.specialtyRepository.findOne({
-      where: { name: normalizedName },
-    });
-
-    if (existingSpecialty) {
-      throw new ConflictException('Specialty with this name already exists');
-    }
+    await this.ensureNameIsAvailable(normalizedName);
 
     const specialty = this.specialtyRepository.create({
       name: normalizedName,
@@ -52,18 +47,10 @@ export class SpecialtyService {
     const specialty = await this.findByIdOrFail(id);
 
     if (updateSpecialtyDto.name !== undefined) {
-      const normalizedName = this.normalizeName(updateSpecialtyDto.name);
+      const normalizedName = standardizeName(updateSpecialtyDto.name);
 
       if (normalizedName !== specialty.name) {
-        const existingSpecialty = await this.specialtyRepository.findOne({
-          where: { name: normalizedName },
-        });
-
-        if (existingSpecialty) {
-          throw new ConflictException(
-            'Specialty with this name already exists',
-          );
-        }
+        await this.ensureNameIsAvailable(normalizedName);
       }
 
       updateSpecialtyDto.name = normalizedName;
@@ -103,7 +90,13 @@ export class SpecialtyService {
     return specialty;
   }
 
-  private normalizeName(name: string): string {
-    return name.trim().toLowerCase();
+  private async ensureNameIsAvailable(name: string): Promise<void> {
+    const existingSpecialty = await this.specialtyRepository.findOne({
+      where: { name },
+    });
+
+    if (existingSpecialty) {
+      throw new ConflictException('Specialty with this name already exists');
+    }
   }
 }
