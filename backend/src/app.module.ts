@@ -4,6 +4,9 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SpecialtyModule } from './modules/specialty/specialty.module';
 import { DoctorModule } from './modules/doctor/doctor.module';
+import { PatientModule } from './modules/patient/patient.module';
+import { HealthPlanModule } from './modules/health-plan/health-plan.module';
+import { PatientPlanModule } from './modules/patient-plan/patient-plan.module';
 
 @Module({
   imports: [
@@ -12,6 +15,9 @@ import { DoctorModule } from './modules/doctor/doctor.module';
     AuthModule,
     SpecialtyModule,
     DoctorModule,
+    PatientModule,
+    HealthPlanModule,
+    PatientPlanModule,
   ],
 })
 export class AppModule {}
