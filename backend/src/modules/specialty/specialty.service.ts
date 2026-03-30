@@ -62,7 +62,7 @@ export class SpecialtyService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
+    await this.findByIdOrFail(id);
 
     const hasDoctorsLinked = await this.doctorRepository.findOne({
       where: { specialtyId: id },

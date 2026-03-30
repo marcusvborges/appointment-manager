@@ -20,13 +20,7 @@ export class DoctorService {
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
-    const existingDoctor = await this.doctorRepository.findOne({
-      where: { crm: createDoctorDto.crm },
-    });
-
-    if (existingDoctor) {
-      throw new ConflictException('Doctor with this CRM already exists');
-    }
+    await this.ensureCrmIsAvailable(createDoctorDto.crm);
 
     await this.checkSpecialtyExists(createDoctorDto.specialtyId);
 
@@ -52,13 +46,7 @@ export class DoctorService {
       updateDoctorDto.crm !== undefined &&
       updateDoctorDto.crm !== doctor.crm
     ) {
-      const existingDoctor = await this.doctorRepository.findOne({
-        where: { crm: updateDoctorDto.crm },
-      });
-
-      if (existingDoctor) {
-        throw new ConflictException('Doctor with this CRM already exists');
-      }
+      await this.ensureCrmIsAvailable(updateDoctorDto.crm);
     }
 
     if (updateDoctorDto.specialtyId !== undefined) {
@@ -91,6 +79,22 @@ export class DoctorService {
   }
 
   private async checkSpecialtyExists(specialtyId: string): Promise<void> {
-    await this.specialtyRepository.findOne({ where: { id: specialtyId } });
+    const specialty = await this.specialtyRepository.findOne({
+      where: { id: specialtyId },
+    });
+
+    if (!specialty) {
+      throw new NotFoundException('Specialty not found');
+    }
+  }
+
+  private async ensureCrmIsAvailable(crm: string): Promise<void> {
+    const existingDoctor = await this.doctorRepository.findOne({
+      where: { crm },
+    });
+
+    if (existingDoctor) {
+      throw new ConflictException('Doctor with this CRM already exists');
+    }
   }
 }
