@@ -40,7 +40,7 @@ Projeto desenvolvido como desafio técnico.
   - procedimentos
   - vínculos paciente-plano
 
-## Architecture Overview
+## Overview da Arquitetura
 
 Backend estruturado como monolito modular com NestJS.
 
@@ -88,7 +88,7 @@ cd appointment-manager
 pnpm install
 ```
 
-3. **Configure variáveis de ambiente**
+3. **Configure as variáveis de ambiente**
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
@@ -123,7 +123,7 @@ pnpm dev
 
 ## Executando com Docker
 
-1. **Configure variáveis de ambiente**
+1. **Configure as variáveis de ambiente**
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
@@ -171,7 +171,7 @@ DB_NAME=appointment_manager
 JWT_SECRET=jwt_secret
 ```
 
-### Backend (.env)
+### Frontend (.env)
 
 ```env
 VITE_API_URL=http://localhost:3000/api
