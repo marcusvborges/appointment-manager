@@ -42,12 +42,7 @@ Projeto desenvolvido como desafio técnico.
 
 ## Architecture Overview
 
-Backend estruturado como monolito modular com NestJS:
-
-- controllers
-- services
-- DTOs
-- entities
+Backend estruturado como monolito modular com NestJS.
 
 Frontend em Vue 3 + Quasar (SPA).
 
@@ -70,6 +65,15 @@ Frontend em Vue 3 + Quasar (SPA).
 - Quasar
 - Axios
 - Vue Router
+
+## Pré-requisitos
+
+Antes de executar o projeto, certifique-se de ter instalado:
+
+- Node.js 22.x
+- pnpm >= 10
+- Docker
+- Docker Compose
 
 ## Execução Local
 
@@ -95,7 +99,7 @@ cp frontend/.env.example frontend/.env
 docker compose up -d postgres
 ```
 
-5. **Execute as migrations**
+5. **Execute as migrations (dentro do backend)**
 ```bash
 cd backend
 pnpm run migration:run
