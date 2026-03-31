@@ -1,6 +1,6 @@
 import { CustomBaseEntity } from '../../database/entities/base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { Doctor } from 'src/modules/doctor/entities/doctor.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
 
 @Entity('specialties')
 export class Specialty extends CustomBaseEntity {
