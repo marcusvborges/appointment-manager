@@ -23,14 +23,14 @@ export default route(function () {
 
   Router.beforeEach((to, from, next) => {
     const token = getAccessToken();
-    const isLoginRoute = to.path === '/login';
+    const isPublicRoute = ['/login', '/register'].includes(to.path);
 
-    if (!token && !isLoginRoute) {
+    if (!token && !isPublicRoute) {
       next('/login');
       return;
     }
 
-    if (token && isLoginRoute) {
+    if (token && isPublicRoute) {
       next('/appointments');
       return;
     }

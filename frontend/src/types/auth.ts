@@ -11,3 +11,15 @@ export interface LoginResponse {
     email: string;
   };
 }
+
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+}
